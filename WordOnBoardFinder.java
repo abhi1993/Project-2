@@ -30,26 +30,109 @@ import java.util.List;
 public class WordOnBoardFinder {
 
   /**
-   * Return a list of cells on the given board such that the i-th element of the
-   * list corresponds to the i-th character of the string as found on the board.
-   * Returns an empty list if the word cannot be found on the board.
-   * 
-   * @param board
-   *          is searched for the given word
-   * @param word
-   *          is being searched for on the board
-   * @return list of cells on the supplied board that correspond to the word, an
-   *         empty list should be returned if the word cannot be found on the
-   *         board
-   */
-  public List<BoardCell> cellsForWord(BoggleBoard board, String word) {
-    List<BoardCell> list = new ArrayList<BoardCell>();
-    for (int r = 0; r < board.size(); r++) {
-      for (int c = 0; c < board.size(); c++) {
-        /* TODO: Check if the word can be found by starting at (r, c) Hint:
-         * Consider using a helper method that uses recursion. */
-      }
-    }
-    return list;
-  }
+	 * Return a list of cells on the given board such that the i-th element of the
+	 * list corresponds to the i-th character of the string as found on the board.
+	 * Returns an empty list if the word cannot be found on the board.
+	 * 
+	 * @param board
+	 *          is searched for the given word
+	 * @param word
+	 *          is being searched for on the board
+	 * @return list of cells on the supplied board that correspond to the word, an
+	 *         empty list should be returned if the word cannot be found on the
+	 *         board
+	 */
+	public List<BoardCell> cellsForWord(BoggleBoard board, String word) {
+		List<BoardCell> list = new ArrayList<BoardCell>();
+		boolean[][] visited=new boolean[board.size()][board.size()];
+		for (int r = 0; r < board.size(); r++) {
+			for (int c = 0; c < board.size(); c++) {
+				String specialCase="";
+				if(word.length()>1&&word.substring(0,2).equals("qu")){
+					specialCase="qu";
+				}
+
+				if(board.getFace(r, c).equals(word.substring(0,1))||board.getFace(r, c).equals(specialCase)){
+					list.add(new BoardCell(r,c));
+					visited[r][c]=true;
+					String nextWord="";
+
+					if(word.length()>1&&word.substring(0,2).equals("qu")){
+						nextWord=word.substring(2);
+					}
+					else{
+						nextWord=word.substring(1);
+					}
+
+					if(cellsForWordHelper(board,nextWord,visited,list,r,c)){
+						return list;
+					}
+					else{
+						clearArray(visited);
+						list.clear();
+					}
+				}
+
+			}
+		}
+		return list;
+	}
+
+	public boolean cellsForWordHelper(BoggleBoard board, String word, boolean[][] visited,List <BoardCell>ls,int r,int c){
+		boolean done=false;
+		if(word.equals("")){
+			return true;
+		}
+
+		else{
+			for(int i=r-1;i<=r+1;i++){
+				for(int j=c-1;j<=c+1;j++){
+					if(board.isInBounds(i, j)){
+						String specialCase="";
+						String face=board.getFace(i, j);
+						if(word.length()>1&&word.substring(0,2).equals("qu")){
+							specialCase="qu";
+						}
+
+
+						if(!visited[i][j]&&(word.substring(0,1).equals(face)||face.equals(specialCase))){ 
+							ls.add(new BoardCell(i,j));
+							visited[i][j]=true;
+							String nextWord="";
+
+							if(word.length()>=2&&word.substring(0,2).equals("qu")){
+								nextWord=word.substring(2);
+							}
+							else{
+								nextWord=word.substring(1);
+							}
+
+							if(cellsForWordHelper(board,nextWord,visited,ls,i,j)){
+								done=true;
+								break;
+							}
+							else{
+								visited[i][j]=false;
+							}
+						}
+					}
+				}
+				if(done)
+					return true;
+			}
+			visited[r][c]=false;
+			ls.remove(ls.size()-1);
+			return false;
+		}
+	}
+
+	public void clearArray(boolean[][]arr){
+		for(int i=0;i<arr.length;i++){
+			for(int j=0;j<arr[i].length;j++){
+				arr[i][j]=false;
+			}
+		}
+	}
+
+
 }
